@@ -26,6 +26,14 @@ RUN apt -y install time
 RUN ./build.sh buildroot rootfs
 
 
+# trying to make the rootfs image
+RUN dd if=/dev/zero of=rootfs.img bs=1MB count=0 seek=1024
+RUN mkfs.ext4 -F rootfs.img
+RUN mkdir ./mnt
+RUN mount -o loop rootfs.img ./mnt
+RUN tar -C ./mnt -zxf buildroot/output/rockchip_rk3288/images/rootfs.tar
+RUN umount ./mnt
+
 #COPY ./image/update.img tools/linux/Linux_Pack_Firmware/rockdev
 #WORKDIR tools/linux/Linux_Pack_Firmware/rockdev
 
