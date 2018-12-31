@@ -15,8 +15,11 @@ RUN ./repo/repo init --repo-url https://github.com/FireflyTeam/repo.git -u \
 	https://github.com/FireflyTeam/manifests.git -b linux-sdk -m rk3288/rk3288_linux_release.xml
 RUN ./repo/repo sync -c
 
-RUN ./build.sh firefly-rk3288-ubuntu.mk
 RUN export RK_KERNEL_DTS=rk3288-firefly
+
+RUN ./build.sh firefly-rk3288.mk
+RUN apt -y install genext2fs
+RUN sed -i 's/^export RK_ROOTFS_IMG.*/export RK_ROOT_FS_IMG=rootfs\/ubuntu1604armhf-rootfs.img/' /app/device/rockchip/.BoardConfig.mk
 
 
 WORKDIR /app
@@ -24,18 +27,27 @@ RUN ./build.sh uboot
 RUN ./build.sh kernel
 RUN apt -y install time
 RUN ./build.sh buildroot rootfs
+RUN apt -y install p7zip-full
+RUN wget http://download.t-firefly.com/product/Rootfs/ubuntu1604armhf-rootfs.7z
+RUN 7z x ubuntu1604armhf-rootfs.7z
+RUN cp ubuntu1604armhf-rootfs.img rootfs/
+
+RUN ./mkfirmware.sh
+
+WORKDIR /app/tools/linux/Linux_Pack_Firmware/rockdev
+RUN rm -f afptool
+RUN wget https://github.com/radxa/rockchip-pack-tools/raw/master/afptool
+RUN chmod +x afptool
+RUN rm -f rkImageMaker
+RUN wget https://github.com/Nu3001/rockdev/raw/master/rkImageMaker
+RUN chmod +x rkImageMaker
+
+RUN cp ./Image/parameter.txt ./parameter
+RUN ./mkupdate.sh
+       
 
 
-# trying to make the rootfs image
-RUN dd if=/dev/zero of=rootfs.img bs=1MB count=0 seek=1024
-RUN mkfs.ext4 -F rootfs.img
-RUN mkdir ./mnt
-RUN mount -o loop rootfs.img ./mnt
-RUN tar -C ./mnt -zxf buildroot/output/rockchip_rk3288/images/rootfs.tar
-RUN umount ./mnt
 
-#COPY ./image/update.img tools/linux/Linux_Pack_Firmware/rockdev
-#WORKDIR tools/linux/Linux_Pack_Firmware/rockdev
-
-#RUN ./unpack.sh
+      
+      
 
