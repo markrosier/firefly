@@ -19,7 +19,7 @@ RUN export RK_KERNEL_DTS=rk3288-firefly
 
 RUN ./build.sh firefly-rk3288.mk
 RUN apt -y install genext2fs
-RUN sed -i 's/^export RK_ROOTFS_IMG.*/export RK_ROOT_FS_IMG=rootfs\/ubuntu1604armhf-rootfs.img/' /app/device/rockchip/.BoardConfig.mk
+RUN sed -i 's/^export RK_ROOTFS_IMG.*/export RK_ROOTFS_IMG=rootfs\/ubuntu1604armhf-rootfs.img/' /app/device/rockchip/.BoardConfig.mk
 
 
 WORKDIR /app
